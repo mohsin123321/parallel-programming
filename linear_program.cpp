@@ -5,6 +5,9 @@
 #include <time.h>       /* time */
 #include <cmath>
 #include <set>
+//#include <map>
+#include <fstream>
+#include <sstream>
 #include "matplotlibcpp.h"
 namespace plt = matplotlibcpp;
 
@@ -42,13 +45,14 @@ class KMeans{
 		int no_of_clusters;
 		vector<Point*> points;
 		vector<Point> centroids;
+		vector<int> clusters; 
 	public:
-		KMeans(int clusters, vector<vector<float> >& arr){
+		KMeans(int clusters,int size, vector<vector<float> *>& arr){
 			this->no_of_clusters = clusters;
 			
 			int i = 1;
-			while(i<=30){
-				this->points.push_back(new Point(arr[i-1][0],arr[i-1][1]));
+			while(i <= size){
+				this->points.push_back(new Point(arr[i-1]->at(0),arr[i-1]->at(1)));
 				i++;
 			}
 			
@@ -150,9 +154,14 @@ class KMeans{
 				new_centroids.push_back(cluster_mean);
 			}
 			
+			
 			this->centroids.clear();
+			this->clusters.assign(old_centroids.begin(),old_centroids.end());
 			this->centroids.assign(new_centroids.begin(),new_centroids.end());
 			
+		}
+		vector<int> getClusters(){
+			return this->clusters;
 		}
 		
 		~KMeans(){
@@ -168,24 +177,31 @@ class KMeans{
 int main(){
 	/***********************
 		
-		Initialization step
+		Initialization step starts
 	
-	************************/
-	int rows = 30;
-	float array[30][2] = {{25,79},{34,51},{22,53},{27,78},{33,59},{33,74},{31,73},{22,57},{35,69},{34,75},{67,51},{54,32},{57,40},{43,47},{50,53},{57,36},{59,35},{52,58},{65,59},{47,50},
-						 {49,25},{48,20},{35,14},{33,12},{44,20},{45,5},{38,29},{43,27},{51,8},{46,7}};
-	vector<vector<float> > data(rows,vector<float> (2,0));
-	
-	for(int i=0;i<rows;i++)
-		for(int j=0;j<2;j++)
-			data[i][j] = array[i][j];
+	************************/	
+	ifstream file("data.csv");
+	vector<vector <float>*> data;
+	string line;
+	int t = 0;
+	int no_of_points = 0;
+	while (getline(file,line)){
+		no_of_points++;
+		stringstream numbers(line);
+		vector<float> pts;
+	        string values;
+	        while (getline(numbers, values,',')){
+	       	pts.push_back(stof(values));
+	        }
+	        data.push_back(new vector<float> (pts));
+	}
 	
 	int clusters;
-	KMeans* K_means= new KMeans(clusters = 3,data);	
+	KMeans* K_means= new KMeans(clusters = 3, no_of_points, data);
 	
   	/***********************
 		
-		Initialization step 
+		Initialization step ends
 	
 	***********************/
 	
@@ -200,27 +216,24 @@ int main(){
 	
 	vector<float> x_points ;
 	vector<float> y_points ;
+	
 	int s;
-	string color;
 	for(int i=0;i<centroids.size();i++){
 		x_centroids.push_back(centroids[i].getX());
 		y_centroids.push_back(centroids[i].getY());
 	}
-	
 	for(int i=0;i<data.size();i++){
-		x_points.push_back(data[i][0]);
-		y_points.push_back(data[i][1]);
+		x_points.push_back(data[i]->at(0));
+		y_points.push_back(data[i]->at(1));
 	}
 	
 	for(int i=0;i<centroids.size();i++){
 		cout << "("<< centroids[i].getX() << "," << centroids[i].getY() << ")\n" ;
 	}
 	
-	plt::scatter(x_points,y_points,s=30);
-	plt::scatter(x_centroids,y_centroids,s=100);
+	plt::scatter_colored(x_points, y_points, K_means->getClusters() , s=30);
+	plt::scatter(x_centroids, y_centroids, s=100, {{"color" , "red"}});
 	plt::show();
-	
-	//cout << centroids.size() << '\n';
 	
 	
 	delete K_means;
