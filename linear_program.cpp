@@ -5,10 +5,17 @@
 #include <time.h>       /* time */
 #include <cmath>
 #include <set>
-//#include <map>
+#include <omp.h>
 #include <fstream>
 #include <sstream>
 #include "matplotlibcpp.h"
+
+
+#define ITERATIONS 100
+#define NO_OF_CLUSTERS 3
+#define CENTROIDS_SIZE 100
+#define POINTS_SIZE 30
+#define CENTROIDS_COLOR "red"
 namespace plt = matplotlibcpp;
 
 using namespace std;
@@ -160,8 +167,9 @@ class KMeans{
 			this->centroids.assign(new_centroids.begin(),new_centroids.end());
 			
 		}
-		vector<int> getClusters(){
-			return this->clusters;
+		
+		int getClusterOfPoint(int i){
+			return this->clusters[i];
 		}
 		
 		~KMeans(){
@@ -170,17 +178,20 @@ class KMeans{
 				//Points[i] = NULL;
 			}
 			this->points.clear();
-			
 		}
 };
 
 int main(){
+	// start wall clock time of the program
+	double start = omp_get_wtime();	
+	
 	/***********************
 		
 		Initialization step starts
 	
-	************************/	
-	ifstream file("data.csv");
+	************************/
+		
+	ifstream file("./dataset/data.csv");
 	vector<vector <float>*> data;
 	string line;
 	int t = 0;
@@ -189,7 +200,7 @@ int main(){
 		no_of_points++;
 		stringstream numbers(line);
 		vector<float> pts;
-	        string values;
+	        string values;	
 	        while (getline(numbers, values,',')){
 	       	pts.push_back(stof(values));
 	        }
@@ -197,7 +208,7 @@ int main(){
 	}
 	
 	int clusters;
-	KMeans* K_means= new KMeans(clusters = 3, no_of_points, data);
+	KMeans* K_means= new KMeans(clusters = NO_OF_CLUSTERS, no_of_points, data);
 	
   	/***********************
 		
@@ -205,7 +216,7 @@ int main(){
 	
 	***********************/
 	
-	for(int i=0;i<10;i++){
+	for(int i=0;i<ITERATIONS;i++){
 		K_means->calcCentroids();
 	}
 	
@@ -214,8 +225,10 @@ int main(){
 	vector<float> x_centroids ;
 	vector<float> y_centroids ;
 	
-	vector<float> x_points ;
-	vector<float> y_points ;
+	vector<float> x_points(data.size()) ;
+	vector<float> y_points(data.size());
+	
+	vector<int> ClusterOfPoints(data.size()) ;
 	
 	int s;
 	for(int i=0;i<centroids.size();i++){
@@ -223,18 +236,21 @@ int main(){
 		y_centroids.push_back(centroids[i].getY());
 	}
 	for(int i=0;i<data.size();i++){
-		x_points.push_back(data[i]->at(0));
-		y_points.push_back(data[i]->at(1));
+		x_points[i] = data[i]->at(0);
+		y_points[i] = data[i]->at(1);
+		ClusterOfPoints[i] = K_means->getClusterOfPoint(i);
 	}
 	
 	for(int i=0;i<centroids.size();i++){
 		cout << "("<< centroids[i].getX() << "," << centroids[i].getY() << ")\n" ;
 	}
 	
-	plt::scatter_colored(x_points, y_points, K_means->getClusters() , s=30);
-	plt::scatter(x_centroids, y_centroids, s=100, {{"color" , "red"}});
-	plt::show();
+	double end = omp_get_wtime();	
+	cout << "Elapsed time = " << end - start << " sec\n" ; 
 	
+	plt::scatter_colored(x_points, y_points, ClusterOfPoints , s=POINTS_SIZE);
+	plt::scatter(x_centroids, y_centroids, s=CENTROIDS_SIZE, {{"color" , CENTROIDS_COLOR}});
+	plt::show();
 	
 	delete K_means;
 
