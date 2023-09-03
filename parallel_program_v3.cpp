@@ -13,7 +13,6 @@
 
 
 #define ITERATIONS 100
-#define THREADS 8
 #define ITERATIONS_CHUNK_SIZE 10
 #define NO_OF_CLUSTERS 3
 #define DATA_CHUNK_SIZE 2500
@@ -66,12 +65,12 @@ class KMeans{
 			this->no_of_clusters = clusters;
 			
 			int i = 1;
-            #pragma omp parallel for schedule(static,DATA_CHUNK_SIZE) num_threads(THREADS)
+            #pragma omp parallel for schedule(static,DATA_CHUNK_SIZE)
             for (int i=0; i< size; i++){
                this->points[i] = new Point(arr[i]->at(0),arr[i]->at(1)); 
             }
 			
-            // #pragma omp parallel for schedule(static,2500) num_threads(THREADS)
+            // #pragma omp parallel for schedule(static,2500)
             // for (int i=0; i< size; i++){
             //     #pragma omp critical
             //     this->points.push_back(new Point(arr[i]->at(0),arr[i]->at(1)));
@@ -234,7 +233,7 @@ int main(){
 	
 	***********************/  
 	
-	#pragma omp parallel for schedule(static,ITERATIONS_CHUNK_SIZE) num_threads(THREADS)
+	#pragma omp parallel for schedule(static,ITERATIONS_CHUNK_SIZE)
 	for(int i=0;i<ITERATIONS;i++){
 		K_means->calcCentroids();	
 	}
@@ -256,7 +255,7 @@ int main(){
 		y_centroids.push_back(centroids[i].getY());
 	}
 
-	#pragma omp parallel for schedule(static, DATA_CHUNK_SIZE) num_threads(THREADS)
+	#pragma omp parallel for schedule(static, DATA_CHUNK_SIZE)
 	for(int i=0;i<data.size();i++){
 		x_points[i] = data[i]->at(0);
 		y_points[i] = data[i]->at(1);
