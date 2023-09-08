@@ -13,7 +13,6 @@
 
 
 #define iterations 100
-#define ITERATIONS_CHUNK_SIZE 10
 #define NO_OF_CLUSTERS 3
 #define DATA_CHUNK_SIZE 2500
 #define CENTROIDS_SIZE 100
@@ -223,7 +222,7 @@ int main(){
 	
 	***********************/  
 	
-	#pragma omp parallel for schedule(static,ITERATIONS_CHUNK_SIZE)
+	#pragma omp parallel for schedule(static)
 	for(int i=0;i<iterations;i++){
 		K_means->calcCentroids();	
 	}
