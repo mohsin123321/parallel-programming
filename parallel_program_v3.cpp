@@ -14,7 +14,6 @@
 
 #define ITERATIONS 100
 #define NO_OF_CLUSTERS 3
-#define DATA_CHUNK_SIZE 2500
 #define CENTROIDS_SIZE 100
 #define POINTS_SIZE 30
 #define CENTROIDS_COLOR "red"
@@ -64,16 +63,10 @@ class KMeans{
 			this->no_of_clusters = clusters;
 			
 			int i = 1;
-            #pragma omp parallel for schedule(static,DATA_CHUNK_SIZE)
+            #pragma omp parallel for schedule(static)
             for (int i=0; i< size; i++){
                this->points[i] = new Point(arr[i]->at(0),arr[i]->at(1)); 
             }
-			
-            // #pragma omp parallel for schedule(static,2500)
-            // for (int i=0; i< size; i++){
-            //     #pragma omp critical
-            //     this->points.push_back(new Point(arr[i]->at(0),arr[i]->at(1)));
-            // }
 
 			/* initialize random seed: */
   			srand (time(NULL));
@@ -254,7 +247,7 @@ int main(){
 		y_centroids.push_back(centroids[i].getY());
 	}
 
-	#pragma omp parallel for schedule(static, DATA_CHUNK_SIZE)
+	#pragma omp parallel for schedule(static)
 	for(int i=0;i<data.size();i++){
 		x_points[i] = data[i]->at(0);
 		y_points[i] = data[i]->at(1);
