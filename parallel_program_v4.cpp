@@ -123,10 +123,7 @@ class KMeans{
 				}
 				vector<float>::iterator it = min_element(distance.begin(), distance.end());
 				int min_index = std::distance(distance.begin(),it);
-				#pragma omp critical
-				{
-					assigned_centroid_index[i] = min_index;
-				}
+				assigned_centroid_index[i] = min_index;
 			}
 			return assigned_centroid_index;
 		}
