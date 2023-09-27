@@ -112,13 +112,16 @@ class KMeans{
 		vector<int> findClosestCentroids(){
 			
 			vector<int> assigned_centroid_index;
+			vector<float> distance; 
+    		vector<float>::iterator it;  
+
 			for (int i=0;i<this->points.size();i++){
-				vector<float> distance;
+				distance.clear();
 				for(int j=0;j<this->centroids.size();j++){
 					distance.push_back(calcDistance(this->points[i],this->centroids[j]));
 				}
 				
-				vector<float>::iterator it = min_element(distance.begin(), distance.end());
+				it = min_element(distance.begin(), distance.end());
 				int min_index = std::distance(distance.begin(),it);
 				
 				assigned_centroid_index.push_back(min_index);

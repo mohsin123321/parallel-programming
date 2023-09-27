@@ -113,14 +113,17 @@ class KMeans{
 		vector<int> findClosestCentroids(){
 			
 			vector<int> assigned_centroid_index(this->points.size());
-			#pragma omp parallel for schedule(static)
+			vector<float> distance; 
+    		vector<float>::iterator it;
+
+			#pragma omp parallel for schedule(static) private(distance,it)
 			for (int i=0;i<this->points.size();i++){
-				vector<float> distance;
+				distance.clear();
 				for(int j=0;j<this->centroids.size();j++){
 					distance.push_back(calcDistance(this->points[i],this->centroids[j]));
 				}
 				
-				vector<float>::iterator it = min_element(distance.begin(), distance.end());
+				it = min_element(distance.begin(), distance.end());
 				int min_index = std::distance(distance.begin(),it);
 				
 				assigned_centroid_index[i]=min_index;
