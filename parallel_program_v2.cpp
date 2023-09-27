@@ -190,7 +190,7 @@ class KMeans{
 		}
 };
 
-int main(){
+int main(int argc, char* argv[]){
 	// start wall clock time of the program
 	double start = omp_get_wtime();	
 	
@@ -200,7 +200,9 @@ int main(){
 	
 	************************/
 		
-	ifstream file("./dataset/data.csv");
+	string filename = "./dataset/"+string(argv[1]);
+	ifstream file(filename);
+
 	vector<vector <float>*> data;
 	string line;
 	int t = 0;
