@@ -222,7 +222,6 @@ int main(){
 	
 	***********************/  
 	
-	#pragma omp parallel for schedule(static)
 	for(int i=0;i<ITERATIONS;i++){
 		K_means->calcCentroids();	
 	}
