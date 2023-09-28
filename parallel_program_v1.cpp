@@ -8,6 +8,7 @@
 #include <omp.h>
 #include <fstream>
 #include <sstream>
+#include <cstdlib>
 #include "matplotlibcpp.h"
 
 
@@ -45,6 +46,11 @@ class Point {
 		void setY(float x){
 			this->y = y;
 		}		
+};
+
+struct PaddedInt {
+	int value;
+	char padding[64 - sizeof(int)];
 };
 
 class KMeans{
@@ -109,9 +115,8 @@ class KMeans{
 			returns the centroids index of the corresponding points
 		****/
 		
-		vector<int> findClosestCentroids(){
-			
-			vector<int> assigned_centroid_index(this->points.size());
+		vector<PaddedInt> findClosestCentroids(){
+			vector<PaddedInt> assigned_centroid_index(this->points.size());
 			vector<float> distance; 
     		vector<float>::iterator it;  
 
@@ -125,22 +130,27 @@ class KMeans{
 				it = min_element(distance.begin(), distance.end());
 				int min_index = std::distance(distance.begin(),it);
 				
-				assigned_centroid_index[i]=min_index;
+				assigned_centroid_index[i].value=min_index;
 			}
 			return assigned_centroid_index;
 		}
 		
 		void calcCentroids(){
 			vector<Point> new_centroids;
-			vector<int> old_centroids = this->findClosestCentroids();
+			vector<PaddedInt> old_centroids = this->findClosestCentroids();
+
+			vector<int> intVector;
+			for (PaddedInt paddedInt : old_centroids) {
+				intVector.push_back(paddedInt.value);
+			}
+
 			vector<pair<Point*,int> > points_with_cluster;
-				
 			for(int i=0;i<this->points.size();i++){
-				points_with_cluster.push_back(make_pair(this->points[i],old_centroids[i]));
+				points_with_cluster.push_back(make_pair(this->points[i],old_centroids[i].value));
 			}
 			
 									
-			set<int> S (old_centroids.begin(),old_centroids.end());
+			set<int> S (intVector.begin(),intVector.end());
 
 			set<int>::iterator it;
 			for (it = S.begin(); it != S.end(); ++it) {
@@ -167,7 +177,7 @@ class KMeans{
 			
 			
 			this->centroids.clear();
-			this->clusters.assign(old_centroids.begin(),old_centroids.end());
+			this->clusters.assign(intVector.begin(),intVector.end());
 			this->centroids.assign(new_centroids.begin(),new_centroids.end());
 			
 		}
@@ -190,7 +200,7 @@ class KMeans{
 };
 
 int main(int argc, char* argv[]){
-	// start wall clock time of the program
+	// // start wall clock time of the program
 	double start = omp_get_wtime();	
 	
 	/***********************
@@ -225,7 +235,7 @@ int main(int argc, char* argv[]){
 		Initialization step ends
 	
 	***********************/  
-	
+
 	for(int i=0;i<ITERATIONS;i++){
 		K_means->calcCentroids();	
 	}
